@@ -17,11 +17,17 @@ console.log = console.info = console.warn = console.error = function(){};
 var jQuery = window.jQuery = function() { return jQuery; };
 jQuery.ready = function() { return jQuery; };
 jQuery.inArray = function() { return jQuery; };
-jQuery.jquery = "1.7.2";
+jQuery.jquery = "1.9.0";
 jQuery.event = { fixHooks: {} };
 var $ = jQuery;
 
 // Ember
 function precompile(string) {
     return Ember.Handlebars.precompile(string).toString();
+}
+
+function render(string, context) {
+    //var template = precompile(string);
+    return context.toString();
+    //return template(context);
 }

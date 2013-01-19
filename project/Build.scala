@@ -20,12 +20,12 @@ object ProjectBuild extends Build {
     libraryDependencies ++= Seq(
       "play" %% "play" % "2.1-RC2" % "provided",
       "play" %% "play-test" % "2.1-RC2" % "test",
-      "rhino" % "js" % "1.7R2",
+      "org.mozilla" % "rhino" % "1.7R4",
       "commons-io" % "commons-io" % "2.4"
     ),
 
     libraryDependencies <++= (scalaVersion, sbtVersion)((scalaVersion, sbtVersion) =>
-      Seq("play" % "sbt-plugin" % "2.1-RC2" % "provided->default(compile)" extra ("scalaVersion" -> "2.9.2"/*scalaVersion*/, "sbtVersion" -> "0.12"/*sbtVersion*/))
+      Seq("play" % "sbt-plugin" % "2.1-RC2" % "provided->default(compile)" extra ("scalaVersion" -> "2.9.2", "sbtVersion" -> "0.12"))
     )
   )
 }

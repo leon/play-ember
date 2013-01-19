@@ -9,25 +9,20 @@ case class JSContext(
 class EmberCompilerSpec extends Specification {
 
   "The Ember compiler" should {
-    "render" in {
-      val template = new File("src/test/resources/hello.handlebars")
-      val context = JSContext("leon")
-      val output = EmberCompiler.render(template, context)
-      output must contain("leon")
-    }
 
     "compile hello template" in {
-      val template = new File("src/test/resources/hello.handlebars")
-      val js = EmberCompiler.compile(template)
-      println(js)
+      val js = EmberCompiler.compile(new File("src/test/resources/hello.handlebars"))
+      js must contain("Hello")
+    }
+
+    "compile hello template again" in {
+      val js = EmberCompiler.compile(new File("src/test/resources/hello.handlebars"))
       js must contain("Hello")
     }
 
     "compile if template" in {
-      val template = new File("src/test/resources/if.handlebars")
-      val js = EmberCompiler.compile(template)
-      println(js)
-      js must contain("If")
+      val js = EmberCompiler.compile(new File("src/test/resources/if.handlebars"))
+      js must contain("rock")
     }
 
   }

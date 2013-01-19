@@ -29,10 +29,10 @@ object EmberPlugin extends Plugin with EmberKeys with PlayAssetsCompiler {
       import scala.util.control.Exception._
 
       // options aren't used at the moment
-      val jsSource = EmberCompiler.compile(handlebarsFile, options)
+      val (jsSource, dependencies) = EmberCompiler.compileDir(handlebarsFile, options)
       // Any error here would be because of Handlebars, not the developer, so we don't want compilation to fail.
       val minified = catching(classOf[CompilationException]).opt(play.core.jscompile.JavascriptCompiler.minify(jsSource, Some(handlebarsFile.getName())))
-      (jsSource, minified, Seq(handlebarsFile))
+      (jsSource, minified, dependencies)
     },
     emberOptions
   )
