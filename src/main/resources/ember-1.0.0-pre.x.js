@@ -1,6 +1,5 @@
-// Version: v1.0.0-pre.3
-// Last commit: bd29d7c (2013-01-17 10:13:59 -0800)
-
+// Version: v1.0.0-pre.4
+// Last commit: 855db1a (2013-01-17 23:06:53 -0800)
 
 (function() {
     /*global __fail__*/
@@ -142,8 +141,8 @@
 
 })();
 
-// Version: v1.0.0-pre.3
-// Last commit: af88cb0 (2013-01-17 10:54:03 -0800)
+// Version: v1.0.0-pre.3-19-g015138e
+// Last commit: 015138e (2013-01-17 23:02:17 -0800)
 
 
 (function() {
@@ -203,7 +202,7 @@
 
          @class Ember
          @static
-         @version 1.0.0-pre.3
+         @version 1.0.0-pre.4
          */
 
         if ('undefined' === typeof Ember) {
@@ -230,10 +229,10 @@
         /**
          @property VERSION
          @type String
-         @default '1.0.0-pre.3'
+         @default '1.0.0-pre.4'
          @final
          */
-        Ember.VERSION = '1.0.0-pre.3';
+        Ember.VERSION = '1.0.0-pre.4';
 
         /**
          Standard environmental variables. You can define these in a global `ENV`
@@ -3147,7 +3146,7 @@
          @module ember-metal
          */
 
-        Ember.warn("The CP_DEFAULT_CACHEABLE flag has been removed and computed properties are always cached by default. Use `volatileRENAMED` if you don't want caching.", Ember.ENV.CP_DEFAULT_CACHEABLE !== false);
+        Ember.warn("The CP_DEFAULT_CACHEABLE flag has been removed and computed properties are always cached by default. Use `volatile` if you don't want caching.", Ember.ENV.CP_DEFAULT_CACHEABLE !== false);
 
 
         var get = Ember.get,
@@ -3300,14 +3299,14 @@
          MyApp.outsideService = Ember.Object.create({
     value: function() {
       return OutsideService.getValue();
-    }.property().volatileRENAMED()
+    }.property().volatile()
   });
          ```
 
-         @method volatileRENAMED
+         @method volatile
          @chainable
          */
-        ComputedPropertyPrototype.volatileRENAMED = function() {
+        ComputedPropertyPrototype.volatile = function() {
             return this.cacheable(false);
         };
 
@@ -12437,7 +12436,7 @@
          */
 
         var jQuery = Ember.imports.jQuery;
-        Ember.assert("Ember Views require jQuery 1.7 (>= 1.7.2) or 1.8", jQuery && (jQuery().jquery.match(/^1\.(7(?!$)(?!\.[01])|8)(\.\d+)?(pre|rc\d?)?/) || Ember.ENV.FORCE_JQUERY));
+        Ember.assert("Ember Views require jQuery 1.7 (>= 1.7.2), 1.8 or 1.9", jQuery && (jQuery().jquery.match(/^1\.(7(?!$)(?!\.[01])|8|9)(\.\d+)?(pre|rc\d?)?/) || Ember.ENV.FORCE_JQUERY));
 
         /**
          Alias for jQuery
@@ -12491,11 +12490,17 @@
 // IE 8 (and likely earlier) likes to move whitespace preceeding
 // a script tag to appear after it. This means that we can
 // accidentally remove whitespace when updating a morph.
-        var movesWhitespace = (function() {
+        /*var movesWhitespace = (function() {
             var testEl = document.createElement('div');
             testEl.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
             return testEl.childNodes[0].nodeValue === 'Test:' &&
                 testEl.childNodes[2].nodeValue === ' Value';
+        })();*/
+
+
+        // PLAY-EMBER fix
+        var movesWhitespace = (function() {
+            return false;
         })();
 
 // Use this to find children by ID instead of using jQuery
@@ -13371,7 +13376,7 @@
             concreteView: Ember.computed(function() {
                 if (!this.isVirtual) { return this; }
                 else { return get(this, 'parentView'); }
-            }).property('parentView').volatileRENAMED(),
+            }).property('parentView').volatile(),
 
             instrumentName: 'core_view',
 
@@ -14178,7 +14183,7 @@
                     } else {
                         return get(this, '_context');
                     }
-                }).volatileRENAMED(),
+                }).volatile(),
 
                 /**
                  @private
@@ -16814,10 +16819,7 @@
                 // a script tag to appear after it. This means that we can
                 // accidentally remove whitespace when updating a morph.
                     movesWhitespace = (function() {
-                        var testEl = document.createElement('div');
-                        testEl.innerHTML = "Test: <script type='text/x-placeholder'></script>Value";
-                        return testEl.childNodes[0].nodeValue === 'Test:' &&
-                            testEl.childNodes[2].nodeValue === ' Value';
+                        return false;
                     })();
 
                 // Constructor that supports either Metamorph('foo') or new
@@ -18054,7 +18056,7 @@
                 }
 
                 return valueNormalizer ? valueNormalizer(result) : result;
-            }).property('path', 'pathRoot', 'valueNormalizerFunc').volatileRENAMED(),
+            }).property('path', 'pathRoot', 'valueNormalizerFunc').volatile(),
 
             rerenderIfNeeded: function() {
                 this.currentState.rerenderIfNeeded(this);
@@ -19725,6 +19727,25 @@
             Ember.TEMPLATES[name](this, { data: options.data });
         });
 
+        Ember.Handlebars.registerHelper('partial', function(name, options) {
+            var nameParts = name.split("/"),
+                lastPart = nameParts[nameParts.length - 1];
+
+            nameParts[nameParts.length - 1] = "_" + lastPart;
+
+            var underscoredName = nameParts.join("/");
+
+            var template = Ember.TEMPLATES[underscoredName],
+                deprecatedTemplate = Ember.TEMPLATES[name];
+
+            Ember.deprecate("You tried to render the partial " + name + ", which should be at '" + underscoredName + "', but Ember found '" + name + "'. Please use a leading underscore in your partials", template);
+            Ember.assert("Unable to find partial with name '"+name+"'.", template || deprecatedTemplate);
+
+            template = template || deprecatedTemplate;
+
+            template(this, { data: options.data });
+        });
+
     })();
 
 
@@ -20792,7 +20813,7 @@
                     // `new Number(4) !== 4`, we use `==` below
                     return content == selection;
                 }
-            }).property('content', 'parentView.selection').volatileRENAMED(),
+            }).property('content', 'parentView.selection').volatile(),
 
             labelPathDidChange: Ember.observer(function() {
                 var labelPath = get(this, 'parentView.optionLabelPath');
@@ -20938,23 +20959,23 @@
                 // * `invalidChars`: a String with a list of all invalid characters
                 // * `repeat`: true if the character specification can repeat
 
-                function StaticSegment(str) { this.str = str; }
+                function StaticSegment(string) { this.string = string; }
                 StaticSegment.prototype = {
                     eachChar: function(callback) {
-                        var str = this.str, char;
+                        var string = this.string, char;
 
-                        for (var i=0, l=str.length; i<l; i++) {
-                            char = str.charAt(i);
+                        for (var i=0, l=string.length; i<l; i++) {
+                            char = string.charAt(i);
                             callback({ validChars: char });
                         }
                     },
 
                     regex: function() {
-                        return this.str.replace(escapeRegex, '\\$1');
+                        return this.string.replace(escapeRegex, '\\$1');
                     },
 
                     generate: function() {
-                        return this.str;
+                        return this.string;
                     }
                 };
 
@@ -21585,13 +21606,13 @@
 
                      Used internally by `generate` and `transitionTo`.
                      */
-                    _paramsForHandler: function(handlerName, objects, callback) {
+                    _paramsForHandler: function(handlerName, objects, doUpdate) {
                         var handlers = this.recognizer.handlersFor(handlerName),
                             params = {},
                             toSetup = [],
                             startIdx = handlers.length,
                             objectsToMatch = objects.length,
-                            object, handlerObj, handler, names, i, len;
+                            object, objectChanged, handlerObj, handler, names, i, len;
 
                         // Find out which handler to start matching at
                         for (i=handlers.length-1; i>=0 && objectsToMatch>0; i--) {
@@ -21610,25 +21631,42 @@
                             handlerObj = handlers[i];
                             handler = this.getHandler(handlerObj.handler);
                             names = handlerObj.names;
+                            objectChanged = false;
 
+                            // If it's a dynamic segment
                             if (names.length) {
-                                // Don't use objects if we haven't gotten to the match point yet
-                                if (i >= startIdx && objects.length) { object = objects.shift(); }
-                                else { object = handler.context; }
+                                // If we have objects, use them
+                                if (i >= startIdx) {
+                                    object = objects.shift();
+                                    objectChanged = true;
+                                    // Otherwise use existing context
+                                } else {
+                                    object = handler.context;
+                                }
 
+                                // Serialize to generate params
                                 if (handler.serialize) {
                                     merge(params, handler.serialize(object, names));
                                 }
-                            } else if (callback) {
-                                object = callback(handler);
-                            } else {
-                                object = undefined;
+                                // If it's not a dynamic segment and we're updating
+                            } else if (doUpdate) {
+                                // If we've passed the match point we need to deserialize again
+                                // or if we never had a context
+                                if (i > startIdx || !handler.hasOwnProperty('context')) {
+                                    if (handler.deserialize) {
+                                        object = handler.deserialize({});
+                                        objectChanged = true;
+                                    }
+                                    // Otherwise use existing context
+                                } else {
+                                    object = handler.context;
+                                }
                             }
-
 
                             // Make sure that we update the context here so it's available to
                             // subsequent deserialize calls
-                            if (handler.context !== object) {
+                            if (doUpdate && objectChanged) {
+                                // TODO: It's a bit awkward to set the context twice, see if we can DRY things up
                                 setContext(handler, object);
                             }
 
@@ -21748,12 +21786,7 @@
                  @private
                  */
                 function doTransition(router, name, method, args) {
-                    var output = router._paramsForHandler(name, args, function(handler) {
-                        if (handler.hasOwnProperty('context')) { return handler.context; }
-                        if (handler.deserialize) { return handler.deserialize({}); }
-                        return null;
-                    });
-
+                    var output = router._paramsForHandler(name, args, true);
                     var params = output.params, toSetup = output.toSetup;
 
                     var url = router.recognizer.generate(name, params);
@@ -21802,6 +21835,10 @@
                     }
 
                     function proceed(value) {
+                        if (handler.context !== object) {
+                            setContext(handler, object);
+                        }
+
                         var updatedObjects = objects.concat([{
                             context: value,
                             handler: result.handler,
@@ -22794,7 +22831,15 @@
             options.name = name;
             options.template = template;
 
-            var controller = options.controller || route.routeName;
+            var controller = options.controller, namedController;
+
+            if (options.controller) {
+                controller = options.controller;
+            } else if (namedController = route.container.lookup('controller:' + name)) {
+                controller = namedController;
+            } else {
+                controller = route.routeName;
+            }
 
             if (typeof controller === 'string') {
                 controller = route.container.lookup('controller:' + controller);
@@ -25992,8 +26037,8 @@
 
 
 })();
-// Version: v1.0.0-pre.3
-// Last commit: af88cb0 (2013-01-17 10:54:03 -0800)
+// Version: v1.0.0-pre.3-19-g015138e
+// Last commit: 015138e (2013-01-17 23:02:17 -0800)
 
 
 (function() {
