@@ -1,4 +1,5 @@
 import java.io.File
+import org.specs2.matcher.MustMatchers
 import org.specs2.mutable._
 import se.radley.ember._
 
@@ -24,6 +25,5 @@ class EmberCompilerSpec extends Specification {
       val js = EmberCompiler.compile(new File("src/test/resources/if.handlebars"))
       js must contain("rock")
     }
-
   }
 }

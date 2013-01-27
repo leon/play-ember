@@ -4,7 +4,6 @@ import io.Source
 import java.io._
 import play.api.PlayException
 import sbt.FeedbackProvidedException
-import scalax.io.Codec
 
 case class CompilationException(source: Option[File], message: String, atLine: Option[Int], column: Option[Int])
   extends PlayException.ExceptionSource("Compilation error", message)
@@ -69,7 +68,7 @@ object EmberCompiler {
     Context.exit()
 
     (source: File, options: Seq[String]) => {
-      val handlebarsCode = Path(source).string(Codec.UTF8).replace("\r", "")
+      val handlebarsCode = Path(source).string.replace("\r", "")
       println(handlebarsCode)
       //val options = ctx.newObject(scope)
       //options.put("bare", options, bare)
@@ -104,7 +103,7 @@ object EmberCompiler {
 
       case e: Throwable => throw CompilationException(
         Some(source),
-        s"Unexpected exception during Ember compilation (file=$source, ember=$ember): $e",
+        "Unexpected exception during Ember compilation (file=%s, ember=%s): %s".format(source, ember, e),
         None,
         None
       )
@@ -129,7 +128,7 @@ object EmberCompiler {
         }
         else if (file.isFile && name.endsWith(".handlebars")) {
           val templateName = path + name.replace(".handlebars", "")
-          println(s"play-ember: processing template $templateName")
+          println("play-ember: processing template %s".format(templateName))
 
           val jsSource = compile(file, options)
           dependencies += file

@@ -3,14 +3,14 @@ import sbt.Keys._
 
 object ProjectBuild extends Build {
 
-  lazy val buildVersion =  "0.1-SNAPSHOT"
+  lazy val buildVersion =  "0.4-SNAPSHOT"
 
   lazy val root = Project(id = "play-ember", base = file("."), settings = Project.defaultSettings ++ Publish.settings ++ Ls.settings).settings(
     sbtPlugin := true,
     organization := "se.radley",
     description := "PlayFramework 2 Ember Handlebars Precompile Plugin",
     version := buildVersion,
-    scalaVersion := "2.10.0",
+    scalaVersion := "2.9.2",
     parallelExecution in Test := false,
     testFrameworks += TestFrameworks.Specs2,
 
@@ -18,8 +18,8 @@ object ProjectBuild extends Build {
     resolvers += "Typesafe Snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
 
     libraryDependencies ++= Seq(
-      "play" %% "play" % "2.1-RC2" % "provided",
-      "play" %% "play-test" % "2.1-RC2" % "test",
+      "play" % "play_2.10" % "2.1-RC2" % "provided",
+      "play" % "play-test_2.10" % "2.1-RC2" % "test",
       "org.mozilla" % "rhino" % "1.7R4",
       "commons-io" % "commons-io" % "2.4"
     ),
